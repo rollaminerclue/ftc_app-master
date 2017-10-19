@@ -53,7 +53,7 @@ public class JLKoenigTeleOp extends LinearOpMode {
             telemetry.addData("Left Motor Power", leftMotorTest.getPower());
 
             if(this.gamepad1.left_trigger != 0 && elevatorFlag && elevatorPower < 1) {
-                elevatorPower += 0.10;
+                elevatorPower += 0.1;
                 elevatorPower = Math.round(elevatorPower * 10)/10.0;
                 elevatorFlag = false;
             } else if(this.gamepad1.right_trigger != 0 && elevatorFlag && elevatorPower > 0) {
