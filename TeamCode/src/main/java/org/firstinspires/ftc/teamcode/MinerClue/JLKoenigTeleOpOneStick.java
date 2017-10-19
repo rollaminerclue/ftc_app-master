@@ -44,8 +44,8 @@ public class JLKoenigTeleOpOneStick extends LinearOpMode {
             tgtPowerR = gamepad1.right_stick_y;
             tgtPowerL = gamepad1.right_stick_y;
 
-            tgtPowerL -= gamepad1.right_stick_x/4 * 3;
-            tgtPowerR += gamepad1.right_stick_x/4 * 3;
+            tgtPowerL -= gamepad1.right_stick_x/4.0 * 3;
+            tgtPowerR += gamepad1.right_stick_x/4.0 * 3;
 
             leftMotorTest.setPower(-tgtPowerL);
             rightMotorTest.setPower(-tgtPowerR);
