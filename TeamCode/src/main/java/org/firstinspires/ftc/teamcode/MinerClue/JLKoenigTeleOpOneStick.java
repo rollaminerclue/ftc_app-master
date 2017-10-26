@@ -23,6 +23,9 @@ public class JLKoenigTeleOpOneStick extends LinearOpMode {
     private Servo servoTest;
     double elevatorPower = 1;
     boolean elevatorFlag = false;
+    boolean precision = false;
+    boolean canSetPrecition = false;
+    double precitionVal = 1;
     @Override
     public void runOpMode() {
         imu = hardwareMap.get(Gyroscope.class, "imu");
@@ -44,8 +47,8 @@ public class JLKoenigTeleOpOneStick extends LinearOpMode {
             tgtPowerR = gamepad1.right_stick_y;
             tgtPowerL = gamepad1.right_stick_y;
 
-            tgtPowerL -= gamepad1.right_stick_x/4.0 * 3;
-            tgtPowerR += gamepad1.right_stick_x/4.0 * 3;
+            tgtPowerL -= gamepad1.right_stick_x/2;
+            tgtPowerR += gamepad1.right_stick_x/2;
 
             leftMotorTest.setPower(-tgtPowerL);
             rightMotorTest.setPower(-tgtPowerR);
@@ -68,12 +71,23 @@ public class JLKoenigTeleOpOneStick extends LinearOpMode {
 
             telemetry.addData("Elevator Power", elevatorPower);
 
+            if(canSetPrecition && gamepad1.left_bumper && gamepad1.right_bumper) {
+                precision = true;
+                canSetPrecition = false;
+            }
+            if(!gamepad1.left_bumper && !gamepad1.right_bumper)
+                canSetPrecition = true;
+
+            if(precision)
+                precitionVal = 0.3;
+            else
+                precitionVal = 1;
             if(this.gamepad1.a)
-                elevatorMotorTest.setPower(elevatorPower);
+                elevatorMotorTest.setPower(elevatorPower * precitionVal);
             else
                 elevatorMotorTest.setPower(0);
             if (this.gamepad1.b)
-                elevatorMotorTest.setPower (-elevatorPower);
+                elevatorMotorTest.setPower (-elevatorPower * precitionVal);
             else
                 elevatorMotorTest.setPower (0);
 
