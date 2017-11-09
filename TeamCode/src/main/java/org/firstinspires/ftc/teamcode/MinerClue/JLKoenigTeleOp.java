@@ -27,10 +27,12 @@ public class JLKoenigTeleOp extends LinearOpMode {
     private DcMotor rightMotorTest;
     private DcMotor leftMotorTest;
     private DcMotor elevatorMotorTest;
+    private DcMotor beltMotorTest;
     private DigitalChannel digitalTouch;
     private DistanceSensor sensorColorRange;
     private Color currentColor;
     private ColorSensor sensorColorRecognition;
+    private float [] HSB = new float [3];
     private Servo servoTest;
     double elevatorPower = 1;
     boolean elevatorFlag = false;
@@ -43,13 +45,14 @@ public class JLKoenigTeleOp extends LinearOpMode {
         rightMotorTest = hardwareMap.get(DcMotor.class, "Rmotor");
         rightMotorTest.setDirection(DcMotorSimple.Direction.REVERSE);
         leftMotorTest = hardwareMap.get(DcMotor.class, "Lmotor");
-        elevatorMotorTest = hardwareMap.get(DcMotor.class, "elevator");
+        beltMotorTest = hardwareMap.get (DcMotor.class, "belt1");
+        elevatorMotorTest = hardwareMap.get (DcMotor.class, "elevator");
         //digitalTouch = hardwareMap.get(DigitalChannel.class, "digitalTouch");
         sensorColorRange = hardwareMap.get(DistanceSensor.class, "sensorColorRange");
         sensorColorRecognition = hardwareMap.get (ColorSensor.class, "sensorColorRange");
         servoTest = hardwareMap.get(Servo.class, "servoTest");
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
+        servoTest.scaleRange(.5,1);
+        telemetry.addData("Status", "Initialized");;
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -68,21 +71,29 @@ public class JLKoenigTeleOp extends LinearOpMode {
             telemetry.addData("Left Motor Power", leftMotorTest.getPower());
             telemetry.addData("Precision Active", precision);
 
-            telemetry.addData ( "Distance (cm))", sensorColorRange.getDistance(DistanceUnit.CM));
-            telemetry.addData ( "Detect Blue", detectBlue);
-//            currentColor = Color..valueOf((float)sensorColorRecognition.red(), (float)sensorColorRecognition.green(), (float)sensorColorRecognition.blue(), (float)sensorColorRecognition.alpha());
-
-                    telemetry.addData ( "Hue", sensorColorRecognition.argb());
-            telemetry.addData ( "Saturation", sensorColorRecognition.alpha());
 
 
-//            if(sensorColorRecognition.argb() > 210 && sensorColorRecognition.argb() < 275 && sensorColorRecognition.alpha() >= 0.6) {
-//                detectBlue = true;
+
+            Color.RGBToHSV(sensorColorRecognition.red(), sensorColorRecognition.green(), sensorColorRecognition.blue(), HSB);
+            telemetry.addData( "Saturation", HSB [1]);
+            telemetry.addData ("Hue", HSB [0]);
+            if (HSB [0] > 200 && HSB [0] < 275 && HSB [1] >= 0.6) {
+                detectBlue = true;
+                telemetry.addData("Color", "BLUE!!!");
 //                rightMotorTest.setPower(1);
-//            } else {
-//                detectBlue = false;
+            } else {
+                detectBlue = false;
+                telemetry.addData("Color", "Not Blue :(");
 //                rightMotorTest.setPower(0);
-//            }
+            }
+
+            telemetry.addData("Distance", sensorColorRange.getDistance(DistanceUnit.CM));
+            if (sensorColorRange.getDistance(DistanceUnit.CM) < 2.54)
+                telemetry.addData ("Close", "Yes");
+            else
+                telemetry.addData ("Close", "No");
+
+
 
             if(this.gamepad1.left_trigger != 0 && elevatorFlag && elevatorPower < 1) {
                 elevatorPower += 0.1;
@@ -99,23 +110,30 @@ public class JLKoenigTeleOp extends LinearOpMode {
 
             if(this.gamepad1.a)
                 elevatorMotorTest.setPower(elevatorPower);
+            else if(this.gamepad1.b)
+                elevatorMotorTest.setPower(-elevatorPower);
             else
                 elevatorMotorTest.setPower(0);
-            if (this.gamepad1.b)
-                elevatorMotorTest.setPower (-elevatorPower);
-            else
-                elevatorMotorTest.setPower (0);
 
             if(this.gamepad1.right_bumper)
                 servoTest.setPosition(0.0);
+
             if(this.gamepad1.left_bumper)
                 servoTest.setPosition(1.0);
-
+            telemetry.addData("Servo Test",servoTest.getPosition());
 
             telemetry.addData("Status", "Running");
             telemetry.update();
 
+            if (this.gamepad1.x)
+                beltMotorTest.setPower (elevatorPower);
+            else if(this.gamepad1.y)
+                beltMotorTest.setPower (-elevatorPower);
+            else
+                beltMotorTest.setPower (0);
+
         }
+
     }
 
 
