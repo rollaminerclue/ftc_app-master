@@ -5,6 +5,7 @@ import android.graphics.Color;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -33,7 +34,7 @@ public class JLKoenigTeleOp extends LinearOpMode {
     private Color currentColor;
     private ColorSensor sensorColorRecognition;
     private float [] HSB = new float [3];
-    private Servo servoTest;
+    private CRServo servoTest;
     double elevatorPower = 1;
     boolean elevatorFlag = false;
     boolean precision = false;
@@ -50,8 +51,7 @@ public class JLKoenigTeleOp extends LinearOpMode {
         //digitalTouch = hardwareMap.get(DigitalChannel.class, "digitalTouch");
         sensorColorRange = hardwareMap.get(DistanceSensor.class, "sensorColorRange");
         sensorColorRecognition = hardwareMap.get (ColorSensor.class, "sensorColorRange");
-        servoTest = hardwareMap.get(Servo.class, "servoTest");
-        servoTest.scaleRange(.5,1);
+        servoTest = hardwareMap.get(CRServo.class, "servoTest");
         telemetry.addData("Status", "Initialized");;
 
         // Wait for the game to start (driver presses PLAY)
@@ -71,7 +71,7 @@ public class JLKoenigTeleOp extends LinearOpMode {
             telemetry.addData("Left Motor Power", leftMotorTest.getPower());
             telemetry.addData("Precision Active", precision);
 
-
+            telemetry.addData("Blue", sensorColorRecognition.blue());
 
 
             Color.RGBToHSV(sensorColorRecognition.red(), sensorColorRecognition.green(), sensorColorRecognition.blue(), HSB);
@@ -80,7 +80,8 @@ public class JLKoenigTeleOp extends LinearOpMode {
             if (HSB [0] > 200 && HSB [0] < 275 && HSB [1] >= 0.6) {
                 detectBlue = true;
                 telemetry.addData("Color", "BLUE!!!");
-//                rightMotorTest.setPower(1);
+
+//               rightMotorTest.setPower(1);
             } else {
                 detectBlue = false;
                 telemetry.addData("Color", "Not Blue :(");
@@ -95,18 +96,6 @@ public class JLKoenigTeleOp extends LinearOpMode {
 
 
 
-            if(this.gamepad1.left_trigger != 0 && elevatorFlag && elevatorPower < 1) {
-                elevatorPower += 0.1;
-                elevatorPower = Math.round(elevatorPower * 10)/10.0;
-                elevatorFlag = false;
-            } else if(this.gamepad1.right_trigger != 0 && elevatorFlag && elevatorPower > 0) {
-                elevatorPower -= 0.1;
-                elevatorPower = Math.round(elevatorPower * 10)/10.0;
-                elevatorFlag = false;
-            } else if(this.gamepad1.left_trigger == 0 && this.gamepad1.right_trigger == 0)
-                elevatorFlag = true;
-
-            telemetry.addData("Elevator Power", elevatorPower);
 
             if(this.gamepad1.a)
                 elevatorMotorTest.setPower(elevatorPower);
@@ -116,19 +105,19 @@ public class JLKoenigTeleOp extends LinearOpMode {
                 elevatorMotorTest.setPower(0);
 
             if(this.gamepad1.right_bumper)
-                servoTest.setPosition(0.0);
-
-            if(this.gamepad1.left_bumper)
-                servoTest.setPosition(1.0);
-            telemetry.addData("Servo Test",servoTest.getPosition());
+                servoTest.setPower(1);
+            else if(this.gamepad1.left_bumper)
+                servoTest.setPower(-1);
+            else
+                servoTest.setPower(0);
+            telemetry.addData("Servo Test",servoTest.getPower());
 
             telemetry.addData("Status", "Running");
             telemetry.update();
-
             if (this.gamepad1.x)
-                beltMotorTest.setPower (elevatorPower);
+                beltMotorTest.setPower (5);
             else if(this.gamepad1.y)
-                beltMotorTest.setPower (-elevatorPower);
+                beltMotorTest.setPower (-0.5);
             else
                 beltMotorTest.setPower (0);
 
